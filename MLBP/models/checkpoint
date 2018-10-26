@@ -1,0 +1,2 @@
+model_checkpoint_path: "LAYERS_3_KeepProb_0.95_Batches_100_LrnRate_0.1"
+all_model_checkpoint_paths: "LAYERS_3_KeepProb_0.95_Batches_100_LrnRate_0.1"
