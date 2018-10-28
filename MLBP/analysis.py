@@ -23,6 +23,11 @@ class NN_heatmaps():
     heat_map_2_train_steps = []
     heat_map_3_train_steps = []
 
+    test_accuracy_2L = np.array([])
+    test_accuracy_3L = np.array([])
+    train_accuracy_2L = np.array([])
+    train_accuracy_3L = np.array([])
+
     def __init__(self):
         pass
 
@@ -78,4 +83,36 @@ class NN_heatmaps():
                     self.heat_map_3_test_steps.append(current_kp_test_steps)
                     self.heat_map_3_train_steps.append(current_kp_train_steps)
 
-
+    def accuracy_results(self,learning_rates=(0.003,0.001),keep_probs=(0.85,0.95)):
+        keep_prob = keep_probs[0]
+        learning_rate = learning_rates[0]
+        file_name_train_2L = "results/TRAIN_LAYERS_" + str(2) + "_KeepProb_" + str(keep_prob) + "_Batches_" + str(
+            self.no_batches) + \
+                    "_LrnRate_" + str(learning_rate)
+        file_name_test_2L = "results/TEST_LAYERS_" + str(2) + "_KeepProb_" + str(keep_prob) + "_Batches_" + str(
+            self.no_batches) + \
+                            "_LrnRate_" + str(learning_rate)
+        keep_prob = keep_probs[1]
+        learning_rate = learning_rates[1]
+        file_name_test_3L = "results/TEST_LAYERS_" + str(3) + "_KeepProb_" + str(keep_prob) + "_Batches_" + str(
+            self.no_batches) + \
+                            "_LrnRate_" + str(learning_rate)
+        file_name_train_3L = "results/TRAIN_LAYERS_" + str(3) + "_KeepProb_" + str(keep_prob) + "_Batches_" + str(
+            self.no_batches) + \
+                            "_LrnRate_" + str(learning_rate)
+        data = pd.read_csv(file_name_test_2L, header=None)
+        self.test_accuracy_2L = data.values
+        self.test_accuracy_2L = self.test_accuracy_2L[:,1]
+        self.test_accuracy_2L[0] = 0.1
+        data = pd.read_csv(file_name_test_3L, header=None)
+        self.test_accuracy_3L = data.values
+        self.test_accuracy_3L = self.test_accuracy_3L[:,1]
+        self.test_accuracy_3L[0] = 0.1
+        data = pd.read_csv(file_name_train_3L, header=None)
+        self.train_accuracy_3L = data.values
+        self.train_accuracy_3L = self.train_accuracy_3L[:,1]
+        self.train_accuracy_3L[0] = 0.1
+        data = pd.read_csv(file_name_train_2L, header=None)
+        self.train_accuracy_2L = data.values
+        self.train_accuracy_2L =self.train_accuracy_2L [:,1]
+        self.train_accuracy_2L[0] = 0.1
