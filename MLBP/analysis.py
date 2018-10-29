@@ -23,6 +23,9 @@ class NN_heatmaps():
     heat_map_2_train_steps = []
     heat_map_3_train_steps = []
 
+    conf_matrix_3L = np.array([])
+    conf_matrix_2L = np.array([])
+
     test_accuracy_2L = np.array([])
     test_accuracy_3L = np.array([])
     train_accuracy_2L = np.array([])
@@ -116,3 +119,15 @@ class NN_heatmaps():
         self.train_accuracy_2L = data.values
         self.train_accuracy_2L =self.train_accuracy_2L [:,1]
         self.train_accuracy_2L[0] = 0.1
+
+    def conf_matrix(self,file_2L="Confusion_matrix_LAYERS_2_KeepProb_0.85_Batches_100_LrnRate_0.003.csv",
+                        file_3L="Confusion_matrix_LAYERS_3_KeepProb_0.95_Batches_100_LrnRate_0.001.csv"):
+
+        _conf_matrix_2L = pd.read_csv("template_results/"+file_2L)
+        _conf_matrix_3L = pd.read_csv("template_results/"+file_3L)
+        self.conf_matrix_2L = _conf_matrix_2L.values[:,1:]
+        self.conf_matrix_3L = _conf_matrix_3L.values[:,1:]
+
+
+a = NN_heatmaps()
+a.conf_matrix()

@@ -35,7 +35,8 @@ class Model():
         self.data.one_hot()
 
     def L3_NN_model(self,augment=True,learning_rate=0.01,no_batches=200,save_model=True,no_layers=1,dims=None,folder='results',
-                    no_features=264,keep_prob=0.8,save_results=True,predictor_name="y",print_test=True,no_steps=2000):
+                    no_features=264,keep_prob=0.8,save_results=True,predictor_name="y",print_test=True,no_steps=2000,
+                    confusion_matrix = False):
         tf.reset_default_graph()
         if dims == None:
             dims = np.ones([no_layers,2])
@@ -86,6 +87,8 @@ class Model():
             writer_test = csv.writer(file_write_test, delimiter=',')
             writer_train = csv.writer(file_write_train, delimiter=',')
 
+
+
         saver = tf.train.Saver()
         init = tf.initialize_all_variables()
         sess = tf.Session()
@@ -132,9 +135,20 @@ class Model():
                     writer_train.writerow([i,sum_/self.data.data_train.shape[0]])
         if save_model:
             saver.save(sess,  folder + "/"+ file_name)
-
+        if confusion_matrix:
+            predict_conf = sess.run(y,feed_dict={x:self.data.data_test_splitted})
+            print(predict_conf[:20])
+            print(self.data.labels_test_splitted)
+            conf_matrix = np.zeros((10,10))
+            for iter in range(predict_conf.shape[0]):
+                conf_matrix[np.argmax(self.data.oh_test_splitted[iter]),
+                            np.argmax(predict_conf[iter])] += 1
+            print(conf_matrix)
+            df = pd.DataFrame(conf_matrix, index=None)
+            print(df)
+            df.to_csv("template_results/Confusion_matrix_" + file_name + ".csv")
     def NN_model_2L(self,augment=True,learning_rate=0.01,no_batches=200,save_model=True,no_layers=1,dims=None,no_features=264,keep_prob=0.8,
-                    save_results=True,predictor_name="y",print_test=True,no_steps=2000,folder='results'):
+                    save_results=True,predictor_name="y",print_test=True,no_steps=2000,folder='results',confusion_matrix=True):
         if dims == None:
             dims = np.ones([no_layers,2])
             for j in range(no_layers):
@@ -174,6 +188,8 @@ class Model():
             file_write_train = open(folder + "/TRAIN_" + file_name, "wt")
             writer_test = csv.writer(file_write_test, delimiter=',')
             writer_train = csv.writer(file_write_train, delimiter=',')
+
+
 
         saver = tf.train.Saver()
         init = tf.initialize_all_variables()
@@ -221,6 +237,19 @@ class Model():
                     writer_train.writerow([i,sum_/self.data.data_train.shape[0]])
         if save_model:
             saver.save(sess, folder + "/"+file_name)
+
+        if confusion_matrix:
+            predict_conf = sess.run(y,feed_dict={x:self.data.data_test_splitted})
+            print(predict_conf[:20])
+            print(self.data.labels_test_splitted)
+            conf_matrix = np.zeros((10,10))
+            for iter in range(predict_conf.shape[0]):
+                conf_matrix[np.argmax(self.data.oh_test_splitted[iter]),
+                            np.argmax(predict_conf[iter])] += 1
+            print(conf_matrix)
+            df = pd.DataFrame(conf_matrix,index=None)
+            print(df)
+            df.to_csv("template_results/Confusion_matrix_"+file_name + ".csv",sep=',')
 
     def load_model(self, file_name, accuracy_kaggle=True,log_loss_kaggle=True, no_layers=1,no_features=264,dims=None,sanity_check=True):
         with tf.Session() as sess:
@@ -278,7 +307,8 @@ class Model():
                     row = np.concatenate(([j+1], probs))
                     writer_test.writerow(row)
 
-    def load_model_3L(self, file_name, accuracy_kaggle=True,log_loss_kaggle=True, no_layers=1,no_features=264,dims=None,sanity_check=True):
+    def load_model_3L(self, file_name, accuracy_kaggle=True,log_loss_kaggle=True, no_layers=1,
+                      no_features=264,dims=None,sanity_check=True,confusion_matrix=True):
         with tf.Session() as sess:
 
 
@@ -338,7 +368,6 @@ class Model():
                         row = np.concatenate(([j+1], probs))
                         writer_test.writerow(row)
 
-
     def print_no_parameters(self):
         total_parameters = 0
         for variable in tf.trainable_variables():
@@ -355,7 +384,7 @@ class Model():
 
 
 
-model = Model(final=True,smote=False,normal_split=False)
+model = Model(final=False,smote=False,normal_split=True)
 parameters = 264
 learning_rates = [0.001,0.003,0.005,0.01,0.03]
 keep_probs = [0.7,0.8,0.85,0.9,0.95]
@@ -366,12 +395,13 @@ keep_probs = [0.7,0.8,0.85,0.9,0.95]
 #                           no_layers=3,dims=[[264,264*2],[2*264,264],[264,10]],keep_prob=kp,augment=False)
 
 #tf.reset_default_graph()
-# model.NN_model_2L(print_test=False,learning_rate=0.003,no_batches=100,
-#                  no_layers=2,dims=[[264,264],[264,10]],keep_prob=0.85,
-#                  augment=False,no_steps=2000,folder='template_results')
+model.NN_model_2L(print_test=True,learning_rate=0.003,no_batches=100,
+                 no_layers=2,dims=[[264,264],[264,10]],keep_prob=0.85,
+                 augment=False,no_steps=2000,folder='template_results',save_model=False,confusion_matrix=True)
 
-# model.L3_NN_model(print_test=False,learning_rate=0.001,no_batches=100,
+# model.L3_NN_model(print_test=True,learning_rate=0.001,no_batches=100,
 #                  no_layers=3,dims=[[264,264*2],[264*2,264],[264,10]],keep_prob=0.95,
-#                 augment=False,no_steps=3500,folder='template_results',save_results=False)
+#                 augment=False,no_steps=3500,folder='template_results',
+#                   save_results=False,confusion_matrix=True)
 #model.load_model("template_results/LAYERS_2_KeepProb_0.85_Batches_100_LrnRate_0.003.meta",no_layers=3)
-model.load_model("template_results/LAYERS_2_KeepProb_0.85_Batches_100_LrnRate_0.003.meta",no_layers=2)
+# model.load_model("template_results/LAYERS_2_KeepProb_0.85_Batches_100_LrnRate_0.003.meta",no_layers=2)
